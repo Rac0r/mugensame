@@ -1,6 +1,6 @@
-# mugensame
+# Undertow
 
-An ocean-themed Eleventy blog: post collections, tags, pagination, and a
+An ocean-themed Eleventy starter blog: post collections, tags, pagination, and a
 depth-gauge scroll effect, ready to deploy to GitHub Pages via GitHub Actions.
 
 ## Local development
@@ -58,3 +58,24 @@ domain, and add `eleventyConfig.addPassthroughCopy("src/CNAME");` to the config.
 
 Colors and fonts are defined as CSS variables at the top of `src/css/style.css`
 if you want to adjust the palette or typography later.
+
+## RSS feed
+
+There's an RSS 2.0 feed at `/feed.xml`, generated automatically from the
+`posts` collection — no extra setup needed when you add new posts.
+
+**Before you deploy**, set `url` in `src/_data/site.js` to your actual domain
+root (e.g. `https://yourname.github.io` — without the `/undertow` part,
+`pathPrefix` already adds that). The feed needs a real absolute URL to
+validate correctly in RSS readers.
+
+Once deployed, subscribe in any RSS reader (Feedly, NetNewsWire, Inoreader,
+etc.) by pasting in:
+
+```
+https://yourname.github.io/undertow/feed.xml
+```
+
+Browsers and some readers will also auto-discover the feed just from your
+site's homepage URL, since there's a `<link rel="alternate" type="application/rss+xml">`
+tag pointing to it in the page `<head>`.

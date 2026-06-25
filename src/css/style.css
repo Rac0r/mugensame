@@ -174,8 +174,8 @@ main {
 }
 
 .fin-mark {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 18px;
   fill: var(--bioluminescent);
 }
 
@@ -206,10 +206,10 @@ main {
 
 .hero-fin {
   position: absolute;
-  top: -20px;
-  right: -60px;
-  width: 320px;
-  height: 320px;
+  top: -10px;
+  right: 0;
+  width: 340px;
+  height: 221px;
   fill: var(--bioluminescent);
   opacity: 0.05;
   animation: drift 26s ease-in-out infinite;
@@ -474,6 +474,12 @@ main {
   gap: 0.6rem;
   font-size: 0.85rem;
   opacity: 0.7;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
 }
 
 .back-to-surface {
