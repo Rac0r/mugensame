@@ -1,0 +1,33 @@
+---
+layout: base.njk
+pagination:
+  data: collections.tagList
+  size: 1
+  alias: tag
+permalink: "/tags/{{ tag | slugify }}/"
+eleventyComputed:
+  title: "#{{ tag }}"
+---
+<section>
+  <p class="eyebrow">Reef marker</p>
+  <h1>#{{ tag }}</h1>
+
+  <div class="post-list">
+    {%- for post in collections.posts -%}
+      {%- if tag in post.data.tags -%}
+      <article class="contact-card">
+        <a href="{{ post.url | url }}">
+          <span class="ping" aria-hidden="true"></span>
+          <div>
+            <h2>{{ post.data.title }}</h2>
+            <p class="meta">{{ post.date | readableDate }}</p>
+            <p class="excerpt">{{ post.data.description }}</p>
+          </div>
+        </a>
+      </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <a class="cta cta-ghost" href="{{ '/tags/' | url }}">← All tags</a>
+</section>

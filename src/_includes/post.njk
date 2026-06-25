@@ -1,0 +1,21 @@
+---
+layout: base.njk
+---
+<article class="post">
+  <p class="eyebrow">{{ date | readableDate }}</p>
+  <h1>{{ title }}</h1>
+
+  <div class="tag-row">
+    {%- for tag in tags -%}
+      {%- if tag != "posts" -%}
+      <a class="tag-chip" href="{{ ('/tags/' ~ (tag | slugify) ~ '/') | url }}">#{{ tag }}</a>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <div class="prose">
+    {{ content | safe }}
+  </div>
+
+  <a class="cta cta-ghost" href="{{ '/posts/' | url }}">← Back to the field notes</a>
+</article>

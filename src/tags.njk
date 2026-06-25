@@ -1,0 +1,14 @@
+---
+layout: base.njk
+title: Tags
+permalink: /tags/
+---
+<section>
+  <p class="eyebrow">Chart the reef</p>
+  <h1>Browse by tag</h1>
+  <ul class="tag-cloud">
+    {%- for tag in collections.tagList -%}
+    <li><a href="{{ ('/tags/' ~ (tag | slugify) ~ '/') | url }}">#{{ tag }}</a></li>
+    {%- endfor -%}
+  </ul>
+</section>

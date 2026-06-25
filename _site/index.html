@@ -1,7 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><title>My Site</title></head>
-<body><h1>Hello Same</h1>
-<p>This is the start of endless sharks...</p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — mugensame</title>
+  <meta name="description" content="guides, notes, ramblings and sharks.">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M3 30c5-1 10-4 13-9 2-4 3-9 3-14 4 3 6 9 6 14 5-3 9-2 12 1-4 6-11 10-19 10-7 0-12-1-15-2z' fill='%235EEAD4'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/mugensame/css/style.css">
+</head>
+<body>
+
+  <div class="depth-gauge" aria-hidden="true">
+    <span class="depth-tick"></span>
+    <span class="depth-readout">0m</span>
+  </div>
+
+  <header class="site-header" id="site-header">
+    <a class="brand" href="/mugensame/">
+      <svg class="fin-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M3 30c5-1 10-4 13-9 2-4 3-9 3-14 4 3 6 9 6 14 5-3 9-2 12 1-4 6-11 10-19 10-7 0-12-1-15-2z"/>
+      </svg>
+      <span>mugensame</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/mugensame/posts/">Field Notes</a>
+      <a href="/mugensame/tags/">Tags</a>
+      <a href="/mugensame/about/">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+  <svg class="hero-fin" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M10 150c25-5 50-20 65-45 10-20 15-45 15-70 20 15 30 45 30 70 25-15 45-10 60 5-20 30-55 50-95 50-35 0-60-5-75-10z"/>
+  </svg>
+
+  <p class="eyebrow">Depth log · est. 2026</p>
+  <h1>mugensame</h1>
+  <p class="hero-sub">guides, notes, ramblings and sharks.</p>
+  <a class="cta" href="/mugensame/posts/">Read the field notes →</a>
+</section>
+
+<section class="latest">
+  <p class="eyebrow">Latest contacts</p>
+  <div class="post-list"><article class="contact-card">
+      <a href="/mugensame/posts/neovim_setup/">
+        <span class="ping" aria-hidden="true"></span>
+        <div>
+          <h2>A Neovim Setup That Finally Clicked</h2>
+          <p class="meta">2. Apr. 2026</p>
+          <p class="excerpt">LazyVim, a theme that doesn&#39;t fight your eyes, and the plugins worth keeping.</p>
+        </div>
+      </a>
+    </article></div>
+</section>
+
+  </main>
+
+  <footer class="site-footer">
+    <svg class="wave" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0,30 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,60 L0,60 Z"/>
+    </svg>
+    <div class="footer-inner">
+      <p>&copy; 2026 mugensame. Built with Eleventy.</p>
+      <a href="/mugensame/" class="back-to-surface">↑ Back to the surface</a>
+    </div>
+  </footer>
+
+  <script src="/mugensame/js/depth.js" defer></script>
 </body>
 </html>

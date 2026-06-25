@@ -1,0 +1,33 @@
+---
+layout: base.njk
+title: Home
+permalink: /
+---
+<section class="hero">
+  <svg class="hero-fin" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M10 150c25-5 50-20 65-45 10-20 15-45 15-70 20 15 30 45 30 70 25-15 45-10 60 5-20 30-55 50-95 50-35 0-60-5-75-10z"/>
+  </svg>
+
+  <p class="eyebrow">Depth log · est. {{ site.year }}</p>
+  <h1>{{ site.title }}</h1>
+  <p class="hero-sub">{{ site.description }}</p>
+  <a class="cta" href="{{ '/posts/' | url }}">Read the field notes →</a>
+</section>
+
+<section class="latest">
+  <p class="eyebrow">Latest contacts</p>
+  <div class="post-list">
+    {%- for post in collections.posts | limit(3) -%}
+    <article class="contact-card">
+      <a href="{{ post.url | url }}">
+        <span class="ping" aria-hidden="true"></span>
+        <div>
+          <h2>{{ post.data.title }}</h2>
+          <p class="meta">{{ post.date | readableDate }}</p>
+          <p class="excerpt">{{ post.data.description }}</p>
+        </div>
+      </a>
+    </article>
+    {%- endfor -%}
+  </div>
+</section>

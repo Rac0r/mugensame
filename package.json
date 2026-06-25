@@ -1,16 +1,13 @@
 {
-  "name": "mugensame-project",
+  "name": "mugensame",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A blog site for my alias that I don't know what to do with yet",
+  "type": "module",
   "scripts": {
     "build": "eleventy",
-    "serve": "eleventy --serve"
+    "serve": "eleventy --serve",
+    "debug": "DEBUG=Eleventy* eleventy"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6"
   }
