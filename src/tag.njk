@@ -14,7 +14,7 @@ eleventyComputed:
 
   <div class="post-list">
     {%- for post in collections.posts -%}
-      {%- if tag in post.data.tags -%}
+      {%- if post.data.tags and post.data.tags.includes(tag) -%}
       <article class="contact-card">
         <a href="{{ post.url | url }}">
           <span class="ping" aria-hidden="true"></span>

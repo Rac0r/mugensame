@@ -1,4 +1,4 @@
-# Undertow
+# mugensame
 
 An ocean-themed Eleventy starter blog: post collections, tags, pagination, and a
 depth-gauge scroll effect, ready to deploy to GitHub Pages via GitHub Actions.
@@ -37,7 +37,7 @@ Any other tags you add will automatically get their own page under `/tags/`.
 Open `eleventy.config.js` and check the `pathPrefix`:
 
 - Deploying to `https://<username>.github.io/<repo-name>/` → set
-  `pathPrefix: "/<repo-name>/"` (already set to `/undertow/` — change it to
+  `pathPrefix: "/<repo-name>/"` (already set to `/mugensame/` — change it to
   match your actual repo name).
 - Deploying to `https://<username>.github.io/` (a repo literally named
   `<username>.github.io`) or to a custom domain → remove the `pathPrefix` line
@@ -65,7 +65,7 @@ There's an RSS 2.0 feed at `/feed.xml`, generated automatically from the
 `posts` collection — no extra setup needed when you add new posts.
 
 **Before you deploy**, set `url` in `src/_data/site.js` to your actual domain
-root (e.g. `https://yourname.github.io` — without the `/undertow` part,
+root (e.g. `https://yourname.github.io` — without the `/mugensame` part,
 `pathPrefix` already adds that). The feed needs a real absolute URL to
 validate correctly in RSS readers.
 
@@ -73,9 +73,30 @@ Once deployed, subscribe in any RSS reader (Feedly, NetNewsWire, Inoreader,
 etc.) by pasting in:
 
 ```
-https://yourname.github.io/undertow/feed.xml
+https://yourname.github.io/mugensame/feed.xml
 ```
 
 Browsers and some readers will also auto-discover the feed just from your
 site's homepage URL, since there's a `<link rel="alternate" type="application/rss+xml">`
 tag pointing to it in the page `<head>`.
+
+## Markdown features
+
+On top of plain Markdown, posts support:
+
+- **Emoji shortcodes**, same as GitHub: `:rocket:` → 🚀, `:tada:` → 🎉
+- **GitHub-style alert callouts**:
+  ```md
+  > [!NOTE]
+  > Highlights information readers should take into account.
+  ```
+  Also supports `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, and `[!CAUTION]`, each
+  styled with its own color and icon.
+- **Task lists**:
+  ```md
+  - [x] Done
+  - [ ] Not done yet
+  ```
+
+There's a `src/posts/markdown-features.md` post demonstrating all of these —
+delete it once you've seen how things look.

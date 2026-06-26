@@ -1,7 +1,24 @@
+import { full as markdownItEmoji } from "markdown-it-emoji";
+import markdownItTaskLists from "markdown-it-task-lists";
+import markdownItGithubAlerts from "markdown-it-github-alerts";
+
 export default function (eleventyConfig) {
   // Static assets
   eleventyConfig.addPassthroughCopy("src/css");
   eleventyConfig.addPassthroughCopy("src/js");
+
+  // --- Markdown enhancements ---
+  // amendLibrary (rather than setLibrary) keeps Eleventy's existing markdown-it
+  // setup intact and just adds plugins on top.
+  eleventyConfig.amendLibrary("md", (mdLib) =>
+    mdLib
+      // GitHub-style :emoji: shortcodes, e.g. :rocket: -> 🚀
+      .use(markdownItEmoji)
+      // GitHub-style task lists: "- [ ] foo" / "- [x] done" -> real checkboxes
+      .use(markdownItTaskLists, { enabled: false, label: true, labelAfter: true })
+      // GitHub-style alert blockquotes: > [!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION]
+      .use(markdownItGithubAlerts)
+  );
 
   // --- Filters ---
   eleventyConfig.addFilter("readableDate", (dateObj) => {
