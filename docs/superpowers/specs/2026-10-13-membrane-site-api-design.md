@@ -2,6 +2,7 @@
 
 Date: 2026-10-13
 Status: Draft, awaiting review
+Live site: https://rac0r.github.io/mugensame/
 
 ## Purpose
 
@@ -62,7 +63,7 @@ Provided as environment variables; locally from a git-ignored `gateway/.env`.
 | `GITHUB_TOKEN` | both | Locally: fine-grained PAT, `contents: write` on `Rac0r/mugensame` only. In Actions: the built-in `GITHUB_TOKEN` (read). |
 | `ADMIN_API_KEY` | admin | Secret expected in `X-Api-Key` |
 | `GITHUB_BRANCH` | admin | Branch written to. Default `main`; tests use `admin-test`. |
-| `FEED_URL` | now | Published RSS feed URL (the live site address must be confirmed: `rac0r.github.io` vs. `rac0r.github.io/mugensame/`) |
+| `FEED_URL` | now | Published RSS feed URL, default `https://rac0r.github.io/mugensame/feed.xml` |
 
 `.gitignore` gains `gateway/.env` and `src/_data/now.json`.
 
@@ -88,7 +89,7 @@ returns **401**. GitHub base: `https://api.github.com/repos/Rac0r/mugensame/cont
 | `POST /admin/posts` | JSON (see below) | Derive slug, build front matter + body, base64, `PUT` without `sha` | 201 `{slug, path, commit}` |
 | `PUT /admin/posts/{slug}` | JSON (see below) | `call` GET for `sha`, then `PUT` replacing the whole file | 200 `{slug, path, commit}` |
 | `DELETE /admin/posts/{slug}` | — | `call` GET for `sha`, then `DELETE` | 204 |
-| `PUT /admin/images/{filename}` | raw bytes, `Content-Type: image/*` | base64, `PUT src/images/{filename}` (create only) | 201 `{url: "/images/{filename}"}` |
+| `PUT /admin/images/{filename}` | raw bytes, `Content-Type: image/*` | base64, `PUT src/images/{filename}` (create only) | 201 `{url: "/mugensame/images/{filename}"}` |
 | `PUT /admin/status` | `{"text": "..."}` | Write `src/_data/status.json` as `{text, updatedAt}`; fetch `sha` first if file exists | 200 `{text, updatedAt}` |
 
 ### Post body
@@ -123,15 +124,15 @@ tags:
   filter (lowercase, non-alphanumerics → `-`, trim leading/trailing `-`).
   `PUT` uses the slug from the path and does not rename files.
 - **Validation:** request bodies are validated against JSON Schemas in
-  `gateway/schemas/` before any GitHub call; invalid bodies return **400**
-  with the validation messages. The exact Membrane step is confirmed during
-  planning against Membrane 7.7.
+  `gateway/schemas/` with Membrane's `validator: { jsonSchema: ... }` step
+  (see `examples/validation/json-schema` in the Membrane distribution) before
+  any GitHub call; invalid bodies return **400** with the validation messages.
 - **Commit messages:** `admin: create post <slug>`, `admin: update post <slug>`,
   `admin: delete post <slug>`, `admin: add image <filename>`, `admin: update status`.
 - **Image limits:** filename must match `^[a-z0-9][a-z0-9._-]*\.(png|jpe?g|gif|webp|svg)$`;
-  body at most 5 MB, otherwise **413**. If the live site is served under
-  `/mugensame/`, the returned `url` includes that prefix so it works when
-  pasted into a post.
+  body at most 5 MB, otherwise **413**. The live site is served under
+  `/mugensame/` (Eleventy `pathPrefix`), so the returned `url` is
+  `/mugensame/images/{filename}` and works when pasted into a post.
 
 ### Error mapping
 
@@ -196,7 +197,7 @@ status 200.
 - `eleventy.config.js`: passthrough copy for `src/images`; drafts preprocessor.
 - `src/now.njk`: renders `now` in the existing style; shows "unavailable" for
   any `null` or missing section, and when `now` is empty.
-- Navigation link to `/now/` in `base.njk`.
+- Navigation link to `/now/` in `base.njk` (via the `url` filter, so the prefix is applied).
 
 ## Testing
 
