@@ -24,7 +24,7 @@ result stays usable.
 |---|---|
 | Implementation approach | All logic in Membrane YAML flows; Groovy/JS script steps only where YAML cannot do the job (base64 encoding, front-matter assembly) |
 | Where Membrane runs | Admin API: locally only. Now aggregator: inside the GitHub Actions build. Same config portable to a host later. |
-| Runtime | Docker image `predic8/membrane:7.7.0` everywhere (local `membrane.sh` from a Membrane distribution also works) |
+| Runtime | Locally: native, via `membrane.sh` from the Membrane 7.7.0 distribution at `~/Developer/Tutorials/membrane` (Java 21+; Java 25 installed), wrapped by `gateway/run-local.sh`. In Actions: Docker image `predic8/membrane:7.7.0`. Docker locally only to reproduce CI behaviour. |
 | Admin authentication | API key in `X-Api-Key` header (`apiKey:` step). OAuth2 via GitHub is a later, separate lesson. |
 | Now page sources | GitHub activity, latest blog posts, hand-written status |
 | Config location | `gateway/` folder in this repo |
@@ -44,6 +44,7 @@ gateway/
     admin-smoke.sh
     now-smoke.sh
   .env.example        # documents required variables
+  run-local.sh        # loads .env, starts admin.yaml or now.yaml natively
   README.md           # how to run each part, required tokens
 src/_data/status.json # hand-written status, written by the admin API (committed)
 src/_data/now.json    # generated during build (git-ignored)
@@ -66,6 +67,16 @@ Provided as environment variables; locally from a git-ignored `gateway/.env`.
 | `FEED_URL` | now | Published RSS feed URL, default `https://rac0r.github.io/mugensame/feed.xml` |
 
 `.gitignore` gains `gateway/.env` and `src/_data/now.json`.
+
+### Running locally
+
+`gateway/run-local.sh <admin|now>` sources `gateway/.env` and runs
+`$MEMBRANE_HOME/membrane.sh -c <config>.yaml` from `gateway/`.
+`MEMBRANE_HOME` defaults to `~/Developer/Tutorials/membrane` and can be
+overridden. The first milestone verifies that relative paths in the configs
+(`schemas/`, `scripts/`) resolve correctly when the launcher lives outside
+the repo; if they do not, the configs use paths relative to the config file
+as Membrane expects, and the script documents it.
 
 ### Data flow
 
