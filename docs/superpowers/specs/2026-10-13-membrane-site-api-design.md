@@ -187,8 +187,49 @@ Response:
 }
 ```
 
-A section whose source fails is `null`; the others are still returned, with
-status 200.
+A section whose source answers with an HTTP error or unusable content (e.g.
+a 404 HTML page instead of the feed, a GitHub error JSON) is `null`; the
+others are still returned, with status 200.
+
+If a source is unreachable at network level (DNS failure, connection
+refused), Membrane 7.7's `call` aborts the whole flow and `/now` returns
+500. The workflow then writes `{}` and the page shows every section as
+"unavailable" (see Build and site changes). Per-section isolation for
+network failures is out of scope.
+
+## Membrane 7.7 behaviour this design relies on
+
+Verified with throwaway probe configs against the local 7.7.0 distribution
+on 2026-10-13:
+
+- `call:` forwards the current request's headers (after `headerFilter`) and,
+  for POST/PUT/PATCH, its body; `method:` sets the HTTP method.
+- `call:` replaces the request body and Content-Type with the callee's
+  response but **does not expose the callee's status code**, and continues
+  on 4xx/5xx. Network failures abort the flow with a 500 problem response.
+  Therefore: reads that need branching use `call:` and inspect the body
+  (e.g. `jsonPath('$.sha') == null`); writes whose status matters go out via
+  `target:` so the real GitHub status reaches the `response:` flow.
+- `call:` overwrites the request body, so the original client body must be
+  saved into a property before any `call:` that precedes using it.
+- In the `response:` flow, `return: { status: N }` does not change an
+  existing response's status; status mapping is done in Groovy
+  (`exchange.response.statusCode = N`).
+- A Groovy step's last expression becomes the message body (a Map becomes
+  JSON); scripts that should not change the body end with `CONTINUE`.
+- `template:` with `contentType: application/json` JSON-encodes `${...}`
+  values, so placeholders are written without surrounding quotes.
+- `#{env.NAME}` is substituted at config load time, also inside `apiKey`
+  secrets, URLs and template sources.
+- `global:` steps run for every API in the file (used for the API key check
+  and common GitHub headers in `admin.yaml`).
+- APIs on one port are matched by `method:` and `path.uri`; `/admin/posts`
+  and `/admin/posts/{slug}` do not clash.
+- `validator: { jsonSchema: file }` returns 400 with a problem-details body
+  listing every violation.
+- `xml2Json` on the RSS feed yields `rss.channel.item` as an array for 2+
+  items and as a single object for exactly one item.
+- `isXML()` works in the request flow after a `call:`.
 
 ## Build and site changes
 
@@ -219,8 +260,8 @@ status 200.
   upload → 201; status → 200; delete → 204; read deleted → 404. Assertions
   on status codes and key fields via `jq`.
 - **Now:** `gateway/test/now-smoke.sh` starts `now.yaml`, checks the response
-  shape, then restarts with a broken `FEED_URL` and checks `posts` is `null`
-  while `repos` and `status` are present.
+  shape, then restarts with `FEED_URL` pointing at a URL that returns 404
+  HTML and checks `posts` is `null` while `repos` and `status` are present.
 - **End to end:** manual `workflow_dispatch` run produces a populated `/now/`
   page on the live site.
 
