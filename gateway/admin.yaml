@@ -25,6 +25,26 @@ global:
       - setHeader:
           name: User-Agent
           value: mugensame-gateway
+  - response:
+      - groovy:
+          location: scripts/github-errors.groovy
+---
+# GET /admin/posts/{slug} -> raw Markdown of src/posts/{slug}.md
+# Must stay above list-posts: the first matching API wins and /admin/posts
+# also matches /admin/posts/<slug> as a path prefix.
+api:
+  name: read-post
+  port: 2000
+  method: GET
+  path:
+    uri: /admin/posts/{slug}
+  flow:
+    - request:
+        - setHeader:
+            name: Accept
+            value: application/vnd.github.raw+json
+  target:
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/src/posts/${pathParam.slug}.md?ref=#{env.GITHUB_BRANCH}"
 ---
 # GET /admin/posts -> [{slug, sha}] of src/posts/*.md
 api:

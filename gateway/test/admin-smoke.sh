@@ -29,5 +29,22 @@ check "list contains first" "$(jq -r '[.[].slug] | index("first") != null' <<<"$
 check "list entries are {slug, sha}" "$(jq -c '.[0] | keys' <<<"$BODY")" '["sha","slug"]'
 check "posts.json is not listed" "$(jq -r '[.[].slug] | index("posts") == null' <<<"$BODY")" true
 
+# --- read one post + error mapping (Task 2)
+req GET /admin/posts/first "${KEY[@]}"
+check "read -> 200" "$STATUS" 200
+check "read returns front matter" "$(head -1 <<<"$BODY")" '---'
+check "read contains title" "$(grep -c '^title: First Post$' <<<"$BODY")" 1
+req GET /admin/posts/does-not-exist "${KEY[@]}"
+check "read missing -> 404" "$STATUS" 404
+check "404 body is mapped" "$(jq -r .error <<<"$BODY")" "Not found"
+check "404 keeps GitHub status" "$(jq -r .githubStatus <<<"$BODY")" 404
+
 # === end of sections ===
+
+# --- GitHub rejects the token -> 502 (Task 2). Restarts the gateway; keep last.
+stop_gateway
+(export GITHUB_TOKEN=invalid-token; start_gateway admin)
+req GET /admin/posts "${KEY[@]}"
+check "bad GitHub token -> 502" "$STATUS" 502
+check "502 names GITHUB_TOKEN" "$(jq -r '.error | contains("GITHUB_TOKEN")' <<<"$BODY")" true
 finish
