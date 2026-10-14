@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://www.membrane-api.io/v7.7.0.json
+# GET /now - data for the Now page. Read-only. Runs in GitHub Actions
+# (gateway/ci-fetch-now.sh) and locally (gateway/run-local.sh now).
+# Each `call:` replaces the message body, so every source is reduced to an
+# exchange property right after its call; now-response.groovy merges them.
+api:
+  name: now
+  port: 2000
+  method: GET
+  path:
+    uri: /now
+  flow:
+    - request:
+        # 1. Recently pushed repositories
+        - setHeader:
+            name: Authorization
+            value: "Bearer #{env.GITHUB_TOKEN}"
+        - setHeader:
+            name: Accept
+            value: application/vnd.github+json
+        - setHeader:
+            name: X-GitHub-Api-Version
+            value: "2022-11-28"
+        - setHeader:
+            name: User-Agent
+            value: mugensame-gateway
+        - call:
+            url: https://api.github.com/users/Rac0r/repos?sort=pushed&per_page=5
+        - groovy:
+            location: scripts/now-repos.groovy
+        # 2. Latest posts from the published feed (no token sent to github.io)
+        - headerFilter:
+            - exclude: authorization
+        - call:
+            url: "#{env.FEED_URL}"
+        - if:
+            test: isXML()
+            flow:
+              - xml2Json: {}
+              - groovy:
+                  location: scripts/now-posts.groovy
+        # 3. Hand-written status, committed by the admin API
+        - setHeader:
+            name: Authorization
+            value: "Bearer #{env.GITHUB_TOKEN}"
+        - setHeader:
+            name: Accept
+            value: application/vnd.github.raw+json
+        - call:
+            url: https://api.github.com/repos/Rac0r/mugensame/contents/src/_data/status.json
+        - groovy:
+            location: scripts/now-status.groovy
+        - groovy:
+            location: scripts/now-response.groovy
