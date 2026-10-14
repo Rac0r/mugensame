@@ -5,3 +5,4 @@ _site
 gateway/.env
 gateway/*.log
 gateway/test/*.log
+src/_data/now.json

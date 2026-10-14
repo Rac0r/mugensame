@@ -1,0 +1,62 @@
+---
+layout: base.njk
+title: Now
+description: What I'm doing at the moment.
+permalink: /now/
+---
+<section class="prose-page">
+  <p class="eyebrow">Current heading</p>
+  <h1>Now</h1>
+
+  {% if now.status %}
+    <p>{{ now.status.text | escape }}</p>
+    <p class="eyebrow">Updated {{ now.status.updatedAt | readableDate }}</p>
+  {% else %}
+    <p>Status unavailable.</p>
+  {% endif %}
+</section>
+
+<section class="latest">
+  <p class="eyebrow">Recently pushed</p>
+  {% if now.repos | length %}
+  <div class="post-list">
+    {%- for repo in now.repos -%}
+    <article class="contact-card">
+      <a href="{{ repo.url | escape }}">
+        <span class="ping" aria-hidden="true"></span>
+        <div>
+          <h2>{{ repo.name | escape }}</h2>
+          <p class="meta">{{ repo.pushedAt | readableDate }}</p>
+          {% if repo.description %}<p class="excerpt">{{ repo.description | escape }}</p>{% endif %}
+        </div>
+      </a>
+    </article>
+    {%- endfor -%}
+  </div>
+  {% else %}
+  <p>Repository activity unavailable.</p>
+  {% endif %}
+</section>
+
+<section class="latest">
+  <p class="eyebrow">Latest field notes</p>
+  {% if now.posts | length %}
+  <div class="post-list">
+    {%- for post in now.posts -%}
+    <article class="contact-card">
+      <a href="{{ post.url | escape }}">
+        <span class="ping" aria-hidden="true"></span>
+        <div>
+          <h2>{{ post.title | escape }}</h2>
+          <p class="meta">{{ post.date | readableDate }}</p>
+        </div>
+      </a>
+    </article>
+    {%- endfor -%}
+  </div>
+  {% else %}
+  <p>Posts unavailable.</p>
+  {% endif %}
+
+  {% if now.generatedAt %}<p class="eyebrow">Collected {{ now.generatedAt | readableDate }}</p>{% endif %}
+</section>
