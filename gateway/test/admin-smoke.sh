@@ -115,6 +115,27 @@ check "delete again -> 404" "$STATUS" 404
 req DELETE /admin/posts/Bad_Slug "${KEY[@]}"
 check "delete invalid slug -> 400" "$STATUS" 400
 
+# --- images (Task 6)
+IMG=$(mktemp); BIG=$(mktemp)
+printf '\x89PNG\r\n\x1a\n' > "$IMG"; head -c 2000 /dev/urandom >> "$IMG"
+head -c $((5 * 1024 * 1024 + 1)) /dev/urandom > "$BIG"
+req PUT /admin/images/smoke-test.png "${KEY[@]}" -H "Content-Type: image/png" --data-binary "@$IMG"
+check "image upload -> 201" "$STATUS" 201
+check "image url has site prefix" "$(jq -r .url <<<"$BODY")" "/mugensame/images/smoke-test.png"
+check "image bytes identical" "$(gh_raw src/images/smoke-test.png | cmp -s - "$IMG" && echo same)" same
+req PUT /admin/images/smoke-test.png "${KEY[@]}" -H "Content-Type: image/png" --data-binary "@$IMG"
+check "image exists -> 409" "$STATUS" 409
+req PUT /admin/images/Bad-Name.PNG "${KEY[@]}" -H "Content-Type: image/png" --data-binary "@$IMG"
+check "uppercase filename -> 400" "$STATUS" 400
+req PUT /admin/images/notes.txt "${KEY[@]}" -H "Content-Type: text/plain" --data-binary "@$IMG"
+check "non-image filename -> 400" "$STATUS" 400
+req PUT /admin/images/fake.png "${KEY[@]}" -H "Content-Type: text/plain" --data-binary "@$IMG"
+check "non-image content type -> 400" "$STATUS" 400
+req PUT /admin/images/big.png "${KEY[@]}" -H "Content-Type: image/png" --data-binary "@$BIG"
+check "image over 5 MB -> 413" "$STATUS" 413
+check "big image not committed" "$(gh_status src/images/big.png)" 404
+rm -f "$IMG" "$BIG"
+
 # === end of sections ===
 
 # --- GitHub rejects the token -> 502 (Task 2). Restarts the gateway; keep last.

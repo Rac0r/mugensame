@@ -179,3 +179,26 @@ api:
   target:
     method: DELETE
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
+---
+# PUT /admin/images/{filename} (raw image bytes) -> creates src/images/<filename>
+api:
+  name: upload-image
+  port: 2000
+  method: PUT
+  path:
+    uri: /admin/images/{filename}
+  flow:
+    - request:
+        - setProperty:
+            name: filename
+            value: ${pathParam.filename}
+        - groovy:
+            location: scripts/image-file.groovy
+        - groovy:
+            location: scripts/commit-body.groovy
+    - response:
+        - groovy:
+            location: scripts/commit-response.groovy
+  target:
+    method: PUT
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
