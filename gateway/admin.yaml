@@ -85,3 +85,25 @@ api:
   target:
     method: PUT
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
+---
+# POST /admin/posts {title, description, body, tags?, date?, draft?} -> creates src/posts/<slug>.md
+api:
+  name: create-post
+  port: 2000
+  method: POST
+  path:
+    uri: /admin/posts
+  flow:
+    - request:
+        - validator:
+            jsonSchema: schemas/post.json
+        - groovy:
+            location: scripts/post-file.groovy
+        - groovy:
+            location: scripts/commit-body.groovy
+    - response:
+        - groovy:
+            location: scripts/commit-response.groovy
+  target:
+    method: PUT
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"

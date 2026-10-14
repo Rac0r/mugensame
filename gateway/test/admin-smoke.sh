@@ -53,6 +53,44 @@ check "empty status -> 400" "$STATUS" 400
 req PUT /admin/status "${KEY[@]}" "${JSON[@]}" -d '{"text":"x","extra":1}'
 check "unknown field -> 400" "$STATUS" 400
 
+# --- create post (Task 4)
+SLUG="gateway-test-hello-1"
+POST_BODY=$(jq -n '{title: "Gateway Test: Hello #1", description: "Created by admin-smoke.sh",
+  tags: ["test", "say \"hi\""], body: "Hello from **Membrane**.", date: "2026-10-13"}')
+req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d "$POST_BODY"
+check "create -> 201" "$STATUS" 201
+check "create returns slug" "$(jq -r .slug <<<"$BODY")" "$SLUG"
+check "create returns path" "$(jq -r .path <<<"$BODY")" "src/posts/$SLUG.md"
+check "create returns commit sha" "$(jq -r '.commit | length' <<<"$BODY")" 40
+FILE=$(gh_raw "src/posts/$SLUG.md")
+check "file starts with front matter" "$(sed -n 1p <<<"$FILE")" '---'
+check "title is quoted" "$(sed -n 2p <<<"$FILE")" 'title: "Gateway Test: Hello #1"'
+check "date line" "$(grep -c '^date: 2026-10-13$' <<<"$FILE")" 1
+check "tag with quotes escaped" "$(grep -c '^  - "say \\"hi\\""$' <<<"$FILE")" 1
+check "no draft line" "$(grep -c '^draft:' <<<"$FILE")" 0
+check "body is last line" "$(tail -1 <<<"$FILE")" "Hello from **Membrane**."
+check "front matter is valid YAML" \
+  "$(sed -n '2,/^---$/p' <<<"$FILE" | sed '$d' | ruby -ryaml -rdate -e 'puts YAML.safe_load(STDIN.read, permitted_classes: [Date])["title"]')" \
+  "Gateway Test: Hello #1"
+
+req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d "$POST_BODY"
+check "duplicate create -> 409" "$STATUS" 409
+
+req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d '{"title":"Gateway Draft","description":"d","body":"b","draft":true}'
+check "draft create -> 201" "$STATUS" 201
+check "draft line present" "$(gh_raw src/posts/gateway-draft.md | grep -c '^draft: true$')" 1
+check "date defaults to today (UTC)" \
+  "$(gh_raw src/posts/gateway-draft.md | grep -c "^date: $(date -u +%F)$")" 1
+
+req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d '{"title":"only title"}'
+check "missing fields -> 400" "$STATUS" 400
+req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d '{"title":"!!!","description":"d","body":"b"}'
+check "title without letters -> 400" "$STATUS" 400
+check "no empty-slug file" "$(gh_status src/posts/.md)" 404
+req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d '{"title":"Bad date","description":"d","body":"b","date":"2026-13-45"}'
+check "impossible date -> 400" "$STATUS" 400
+check "bad-date post not committed" "$(gh_status src/posts/bad-date.md)" 404
+
 # === end of sections ===
 
 # --- GitHub rejects the token -> 502 (Task 2). Restarts the gateway; keep last.
