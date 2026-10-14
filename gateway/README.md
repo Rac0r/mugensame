@@ -26,7 +26,7 @@ YAML and script changes reload without a restart.
 
 ## Admin API
 
-Every request needs `X-Api-Key: <ADMIN_API_KEY>` (missing → 401, wrong → 403). Every write is one commit on
+Listens on 127.0.0.1 only. Every request needs `X-Api-Key: <ADMIN_API_KEY>` (missing → 401, wrong → 403). Every write is one commit on
 `GITHUB_BRANCH` (default `main`, which deploys the site).
 
 | Request | Body | Result |
@@ -34,7 +34,7 @@ Every request needs `X-Api-Key: <ADMIN_API_KEY>` (missing → 401, wrong → 403
 | `GET /admin/posts` | — | `[{slug, sha}]` |
 | `GET /admin/posts/{slug}` | — | Markdown |
 | `POST /admin/posts` | `{title, description, body, tags?, date?, draft?}` | 201 `{slug, path, commit}` |
-| `PUT /admin/posts/{slug}` | same as POST | 200 `{slug, path, commit}` |
+| `PUT /admin/posts/{slug}` | same as POST, but `date` and `draft` are required (the whole file is replaced) | 200 `{slug, path, commit}` |
 | `DELETE /admin/posts/{slug}` | — | 204 |
 | `PUT /admin/images/{filename}` | image bytes, `Content-Type: image/*`, ≤ 5 MB | 201 `{url}` |
 | `PUT /admin/status` | `{text}` | 200 `{text, updatedAt}` |

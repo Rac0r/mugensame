@@ -18,6 +18,10 @@ start_gateway admin
 (export ADMIN_API_KEY=""; "$GATEWAY_DIR/run-local.sh" admin > /dev/null 2>&1)
 check "empty ADMIN_API_KEY refuses to start" "$([ $? -ne 0 ] && echo refused)" refused
 
+# --- network exposure (final review)
+check "admin API listens on localhost only" \
+  "$(lsof -nP -iTCP:2000 -sTCP:LISTEN | awk 'NR > 1 {print $9}' | sort -u | tr '\n' ' ')" "127.0.0.1:2000 "
+
 # --- auth + list posts (Task 1)
 req GET /admin/posts
 check "no key -> 401" "$STATUS" 401
@@ -92,12 +96,18 @@ check "impossible date -> 400" "$STATUS" 400
 check "bad-date post not committed" "$(gh_status src/posts/bad-date.md)" 404
 
 # --- update + delete post (Task 5)
-UPDATE_BODY=$(jq -n '{title: "Gateway Test: Hello #1", description: "Updated", body: "Changed body."}')
+UPDATE_BODY=$(jq -n '{title: "Gateway Test: Hello #1", description: "Updated", body: "Changed body.",
+  date: "2026-10-13", draft: false}')
+req PUT "/admin/posts/$SLUG" "${KEY[@]}" "${JSON[@]}" -d "$(jq 'del(.date)' <<<"$UPDATE_BODY")"
+check "update without date -> 400 (would re-date the post)" "$STATUS" 400
+req PUT "/admin/posts/$SLUG" "${KEY[@]}" "${JSON[@]}" -d "$(jq 'del(.draft)' <<<"$UPDATE_BODY")"
+check "update without draft -> 400 (would publish a draft)" "$STATUS" 400
 req PUT "/admin/posts/$SLUG" "${KEY[@]}" "${JSON[@]}" -d "$UPDATE_BODY"
 check "update -> 200" "$STATUS" 200
 check "update keeps slug" "$(jq -r .slug <<<"$BODY")" "$SLUG"
 check "update returns commit sha" "$(jq -r '.commit | length' <<<"$BODY")" 40
 check "file content replaced" "$(gh_raw "src/posts/$SLUG.md" | tail -1)" "Changed body."
+check "update keeps the given date" "$(gh_raw "src/posts/$SLUG.md" | grep -c '^date: 2026-10-13$')" 1
 req PUT /admin/posts/no-such-post "${KEY[@]}" "${JSON[@]}" -d "$UPDATE_BODY"
 check "update missing -> 404" "$STATUS" 404
 check "update did not create file" "$(gh_status src/posts/no-such-post.md)" 404

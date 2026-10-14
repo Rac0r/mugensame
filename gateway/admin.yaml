@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=https://www.membrane-api.io/v7.7.0.json
-# Admin API for mugensame - local only, never deploy this file.
+# Admin API for mugensame - local only, never deploy this file. Every API binds
+# to 127.0.0.1 so nothing else on the network can reach it.
 # Every request needs X-Api-Key; Membrane then calls the GitHub contents API
 # with GITHUB_TOKEN and commits to GITHUB_BRANCH. Start: gateway/run-local.sh admin
 global:
@@ -35,6 +36,7 @@ global:
 api:
   name: read-post
   port: 2000
+  ip: 127.0.0.1
   method: GET
   path:
     uri: /admin/posts/{slug}
@@ -50,6 +52,7 @@ api:
 api:
   name: list-posts
   port: 2000
+  ip: 127.0.0.1
   method: GET
   path:
     uri: /admin/posts
@@ -64,6 +67,7 @@ api:
 api:
   name: put-status
   port: 2000
+  ip: 127.0.0.1
   method: PUT
   path:
     uri: /admin/status
@@ -90,6 +94,7 @@ api:
 api:
   name: create-post
   port: 2000
+  ip: 127.0.0.1
   method: POST
   path:
     uri: /admin/posts
@@ -112,6 +117,7 @@ api:
 api:
   name: update-post
   port: 2000
+  ip: 127.0.0.1
   method: PUT
   path:
     uri: /admin/posts/{slug}
@@ -149,6 +155,7 @@ api:
 api:
   name: delete-post
   port: 2000
+  ip: 127.0.0.1
   method: DELETE
   path:
     uri: /admin/posts/{slug}
@@ -184,6 +191,7 @@ api:
 api:
   name: upload-image
   port: 2000
+  ip: 127.0.0.1
   method: PUT
   path:
     uri: /admin/images/{filename}

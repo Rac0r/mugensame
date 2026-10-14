@@ -41,6 +41,12 @@ if (method == 'DELETE') {
     return CONTINUE
 }
 
+// PUT replaces the whole file, so a missing date would re-date the post and a
+// missing draft flag would publish a draft - both must be sent explicitly.
+if (method == 'PUT' && (input.date == null || input.draft == null)) {
+    return badRequest("PUT replaces the whole post: also send 'date' and 'draft' (GET /admin/posts/${slug} shows the current values)".toString())
+}
+
 String date
 try {
     date = (input.date ? LocalDate.parse(input.date) : LocalDate.now(ZoneOffset.UTC)).toString()
