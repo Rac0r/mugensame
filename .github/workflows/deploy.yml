@@ -4,6 +4,8 @@ on:
     push:
         branches: ["main"]
     workflow_dispatch:
+    schedule:
+        - cron: "17 5 * * *" # daily rebuild so the Now page stays fresh (05:17 UTC)
 
 permissions:
     contents: read
@@ -23,6 +25,10 @@ jobs:
               with:
                 node-version: 20
             - run: npm ci
+            - name: Collect Now page data with Membrane
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gateway/ci-fetch-now.sh
             - run: npx @11ty/eleventy
             - uses: actions/upload-pages-artifact@v3
               with:
@@ -33,7 +39,7 @@ jobs:
         runs-on: ubuntu-latest
         environment:
             name: github-pages
-            url: ${{ steps.deloyment.outputs.page_url }}
+            url: ${{ steps.deployment.outputs.page_url }}
         steps:
             - id: deployment
               uses: actions/deploy-pages@v4

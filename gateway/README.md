@@ -54,4 +54,13 @@ curl -X POST localhost:2000/admin/posts -H "X-Api-Key: $ADMIN_API_KEY" \
 gateway/test/admin-smoke.sh   # all admin routes, on throwaway branch admin-test
 gateway/test/now-smoke.sh     # /now, including failure cases
 test/site-build.sh            # drafts, images, Now page rendering
+gateway/test/ci-fetch-now-test.sh  # the CI step, in Docker
 ```
+
+## CI
+
+The deploy workflow runs `gateway/ci-fetch-now.sh` before Eleventy: it starts
+`now.yaml` in `predic8/membrane:7.7.0`, saves `GET /now` to `src/_data/now.json`
+(git-ignored) and never fails the build — on any error it writes `{}`. A daily
+schedule (05:17 UTC) keeps the page fresh. Test it locally with
+`gateway/test/ci-fetch-now-test.sh`.
