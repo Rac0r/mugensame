@@ -107,3 +107,75 @@ api:
   target:
     method: PUT
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
+---
+# PUT /admin/posts/{slug} -> replaces an existing post; 404 if it does not exist
+api:
+  name: update-post
+  port: 2000
+  method: PUT
+  path:
+    uri: /admin/posts/{slug}
+  flow:
+    - request:
+        - validator:
+            jsonSchema: schemas/post.json
+        - setProperty:
+            name: slug
+            value: ${pathParam.slug}
+        - groovy:
+            location: scripts/post-file.groovy
+        - call:
+            url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}?ref=#{env.GITHUB_BRANCH}"
+        - groovy:
+            location: scripts/read-sha.groovy
+        - if:
+            test: property.sha == null
+            flow:
+              - static:
+                  contentType: application/json
+                  src: '{"error": "Not found"}'
+              - return:
+                  status: 404
+        - groovy:
+            location: scripts/commit-body.groovy
+    - response:
+        - groovy:
+            location: scripts/commit-response.groovy
+  target:
+    method: PUT
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
+---
+# DELETE /admin/posts/{slug} -> deletes the post; 404 if it does not exist
+api:
+  name: delete-post
+  port: 2000
+  method: DELETE
+  path:
+    uri: /admin/posts/{slug}
+  flow:
+    - request:
+        - setProperty:
+            name: slug
+            value: ${pathParam.slug}
+        - groovy:
+            location: scripts/post-file.groovy
+        - call:
+            url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}?ref=#{env.GITHUB_BRANCH}"
+        - groovy:
+            location: scripts/read-sha.groovy
+        - if:
+            test: property.sha == null
+            flow:
+              - static:
+                  contentType: application/json
+                  src: '{"error": "Not found"}'
+              - return:
+                  status: 404
+        - groovy:
+            location: scripts/commit-body.groovy
+    - response:
+        - groovy:
+            location: scripts/commit-response.groovy
+  target:
+    method: DELETE
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"

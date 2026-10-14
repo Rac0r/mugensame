@@ -91,6 +91,30 @@ req POST /admin/posts "${KEY[@]}" "${JSON[@]}" -d '{"title":"Bad date","descript
 check "impossible date -> 400" "$STATUS" 400
 check "bad-date post not committed" "$(gh_status src/posts/bad-date.md)" 404
 
+# --- update + delete post (Task 5)
+UPDATE_BODY=$(jq -n '{title: "Gateway Test: Hello #1", description: "Updated", body: "Changed body."}')
+req PUT "/admin/posts/$SLUG" "${KEY[@]}" "${JSON[@]}" -d "$UPDATE_BODY"
+check "update -> 200" "$STATUS" 200
+check "update keeps slug" "$(jq -r .slug <<<"$BODY")" "$SLUG"
+check "update returns commit sha" "$(jq -r '.commit | length' <<<"$BODY")" 40
+check "file content replaced" "$(gh_raw "src/posts/$SLUG.md" | tail -1)" "Changed body."
+req PUT /admin/posts/no-such-post "${KEY[@]}" "${JSON[@]}" -d "$UPDATE_BODY"
+check "update missing -> 404" "$STATUS" 404
+check "update did not create file" "$(gh_status src/posts/no-such-post.md)" 404
+req PUT /admin/posts/Bad_Slug "${KEY[@]}" "${JSON[@]}" -d "$UPDATE_BODY"
+check "update invalid slug -> 400" "$STATUS" 400
+req PUT "/admin/posts/$SLUG" "${KEY[@]}" "${JSON[@]}" -d '{"title":"x"}'
+check "update invalid body -> 400" "$STATUS" 400
+
+req DELETE "/admin/posts/$SLUG" "${KEY[@]}"
+check "delete -> 204" "$STATUS" 204
+check "delete has empty body" "$BODY" ""
+check "file is gone" "$(gh_status "src/posts/$SLUG.md")" 404
+req DELETE "/admin/posts/$SLUG" "${KEY[@]}"
+check "delete again -> 404" "$STATUS" 404
+req DELETE /admin/posts/Bad_Slug "${KEY[@]}"
+check "delete invalid slug -> 400" "$STATUS" 400
+
 # === end of sections ===
 
 # --- GitHub rejects the token -> 502 (Task 2). Restarts the gateway; keep last.
