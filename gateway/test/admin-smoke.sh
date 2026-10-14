@@ -39,6 +39,20 @@ check "read missing -> 404" "$STATUS" 404
 check "404 body is mapped" "$(jq -r .error <<<"$BODY")" "Not found"
 check "404 keeps GitHub status" "$(jq -r .githubStatus <<<"$BODY")" 404
 
+# --- status (Task 3)
+req PUT /admin/status "${KEY[@]}" "${JSON[@]}" -d '{"text":"testing the gateway"}'
+check "status first write -> 200" "$STATUS" 200
+check "status echoes text" "$(jq -r .text <<<"$BODY")" "testing the gateway"
+check "status has ISO updatedAt" "$(jq -r '.updatedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T")' <<<"$BODY")" true
+check "status file committed" "$(gh_raw src/_data/status.json | jq -r .text)" "testing the gateway"
+req PUT /admin/status "${KEY[@]}" "${JSON[@]}" -d '{"text":"second: with \"quotes\""}'
+check "status overwrite -> 200" "$STATUS" 200
+check "status file overwritten" "$(gh_raw src/_data/status.json | jq -r .text)" 'second: with "quotes"'
+req PUT /admin/status "${KEY[@]}" "${JSON[@]}" -d '{"text":""}'
+check "empty status -> 400" "$STATUS" 400
+req PUT /admin/status "${KEY[@]}" "${JSON[@]}" -d '{"text":"x","extra":1}'
+check "unknown field -> 400" "$STATUS" 400
+
 # === end of sections ===
 
 # --- GitHub rejects the token -> 502 (Task 2). Restarts the gateway; keep last.

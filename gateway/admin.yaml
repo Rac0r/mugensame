@@ -59,3 +59,29 @@ api:
             location: scripts/list-posts.groovy
   target:
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/src/posts?ref=#{env.GITHUB_BRANCH}"
+---
+# PUT /admin/status {text} -> writes src/_data/status.json (creates it if missing)
+api:
+  name: put-status
+  port: 2000
+  method: PUT
+  path:
+    uri: /admin/status
+  flow:
+    - request:
+        - validator:
+            jsonSchema: schemas/status.json
+        - groovy:
+            location: scripts/status-file.groovy
+        - call:
+            url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}?ref=#{env.GITHUB_BRANCH}"
+        - groovy:
+            location: scripts/read-sha.groovy
+        - groovy:
+            location: scripts/commit-body.groovy
+    - response:
+        - groovy:
+            location: scripts/commit-response.groovy
+  target:
+    method: PUT
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
