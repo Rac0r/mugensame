@@ -90,8 +90,8 @@ as Membrane expects, and the script documents it.
 
 ## Admin API (`gateway/admin.yaml`)
 
-Port 2000. Every route starts with the `apiKey:` step; a missing or wrong key
-returns **401**. GitHub base: `https://api.github.com/repos/Rac0r/mugensame/contents/`.
+Port 2000. Every route starts with the `apiKey:` step; a missing key returns
+**401**, a wrong key **403** (Membrane 7.7's `apiKey` behaviour). GitHub base: `https://api.github.com/repos/Rac0r/mugensame/contents/`.
 
 | Route | Request | Behaviour | Success |
 |---|---|---|---|
@@ -149,7 +149,8 @@ tags:
 
 | Situation | Response |
 |---|---|
-| Missing/invalid API key | 401 |
+| Missing API key | 401 |
+| Wrong API key | 403 |
 | Body fails schema / bad filename | 400 |
 | Image too large | 413 |
 | Create on existing file (GitHub 422) | 409 |

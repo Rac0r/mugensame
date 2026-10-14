@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://www.membrane-api.io/v7.7.0.json
+# Admin API for mugensame - local only, never deploy this file.
+# Every request needs X-Api-Key; Membrane then calls the GitHub contents API
+# with GITHUB_TOKEN and commits to GITHUB_BRANCH. Start: gateway/run-local.sh admin
+global:
+  - apiKey:
+      stores:
+        - simple:
+            - secret:
+                value: "#{env.ADMIN_API_KEY}"
+      extractors:
+        - header: X-Api-Key
+  - request:
+      - headerFilter:
+          - exclude: x-api-key
+      - setHeader:
+          name: Authorization
+          value: "Bearer #{env.GITHUB_TOKEN}"
+      - setHeader:
+          name: Accept
+          value: application/vnd.github+json
+      - setHeader:
+          name: X-GitHub-Api-Version
+          value: "2022-11-28"
+      - setHeader:
+          name: User-Agent
+          value: mugensame-gateway
+---
+# GET /admin/posts -> [{slug, sha}] of src/posts/*.md
+api:
+  name: list-posts
+  port: 2000
+  method: GET
+  path:
+    uri: /admin/posts
+  flow:
+    - response:
+        - groovy:
+            location: scripts/list-posts.groovy
+  target:
+    url: "https://api.github.com/repos/Rac0r/mugensame/contents/src/posts?ref=#{env.GITHUB_BRANCH}"
