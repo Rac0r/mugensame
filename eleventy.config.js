@@ -6,6 +6,15 @@ export default function (eleventyConfig) {
   // Static assets
   eleventyConfig.addPassthroughCopy("src/css");
   eleventyConfig.addPassthroughCopy("src/js");
+  eleventyConfig.addPassthroughCopy("src/images");
+
+  // Posts with `draft: true` are left out of production builds (`npm run build`,
+  // the deploy workflow) but still render with `npm run serve` for previewing.
+  eleventyConfig.addPreprocessor("drafts", "*", (data) => {
+    if (data.draft && process.env.ELEVENTY_RUN_MODE === "build") {
+      return false;
+    }
+  });
 
   // --- Markdown enhancements ---
   // amendLibrary (rather than setLibrary) keeps Eleventy's existing markdown-it
