@@ -171,7 +171,12 @@ Eleventy 3 does not skip drafts by default. Add a preprocessor in
 builds the response with `template`:
 
 1. **Repos:** `GET https://api.github.com/users/Rac0r/repos?sort=pushed&per_page=5`
-   → `name`, `description`, `html_url`, `pushed_at`.
+   → `name`, `description`, `html_url`, `pushed_at`. Then a `for:` loop over
+   those repos calls `GET /repos/{full_name}/commits/HEAD` for each and keeps
+   the commit message, `html_url` and up to 10 changed files with their added
+   and removed line counts (`moreFiles` counts the rest). A repo whose commit
+   lookup fails (e.g. an empty repo) gets `commit: null`. Added 2026-11-12 so
+   the Now page cards can open to show the latest commit.
 2. **Posts:** `GET $FEED_URL` → `xml2Json` → first 3 items → `title`, `link`, `pubDate`.
    Reflects the previously published deploy, since the feed is built in the
    same run.
@@ -183,7 +188,9 @@ Response:
 {
   "generatedAt": "ISO-8601",
   "status": { "text": "...", "updatedAt": "ISO-8601" },
-  "repos":  [{ "name": "...", "description": "...", "url": "...", "pushedAt": "ISO-8601" }],
+  "repos":  [{ "name": "...", "description": "...", "url": "...", "pushedAt": "ISO-8601",
+              "commit": { "message": "...", "url": "...", "moreFiles": 0,
+                          "files": [{ "filename": "...", "additions": 0, "deletions": 0 }] } }],
   "posts":  [{ "title": "...", "url": "...", "date": "..." }]
 }
 ```

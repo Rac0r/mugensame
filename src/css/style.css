@@ -350,6 +350,108 @@ main {
   100% { opacity: 0; transform: scale(2.2); }
 }
 
+/* Now page: repo cards open to show the latest commit */
+.repo-card summary {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.1rem 1.2rem;
+  color: var(--foam);
+  cursor: pointer;
+  list-style: none;
+}
+
+.repo-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.repo-card summary:focus-visible {
+  outline: 2px solid var(--bioluminescent);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+.repo-card[open] {
+  border-color: rgba(94, 234, 212, 0.45);
+  background: rgba(94, 234, 212, 0.06);
+}
+
+.repo-card[open] .ping::after {
+  animation: ping 1.1s ease-out infinite;
+}
+
+.repo-card .chevron {
+  display: inline-block;
+  margin-left: auto;
+  color: var(--bioluminescent);
+  font-size: 0.8rem;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+.repo-card[open] .chevron {
+  transform: rotate(90deg);
+}
+
+.repo-card .commit {
+  padding: 0 1.2rem 1.1rem calc(1.2rem + 10px + 1rem);
+}
+
+.commit-message {
+  margin: 0 0 0.8rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 2px solid var(--bioluminescent);
+  background: rgba(3, 11, 20, 0.6);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.commit-files {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.commit-files li {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px dashed rgba(94, 234, 212, 0.1);
+}
+
+.commit-files .file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.commit-files .added {
+  color: var(--kelp);
+}
+
+.commit-files .removed {
+  color: var(--ripcurrent);
+}
+
+.more-files {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  opacity: 0.7;
+}
+
+.commit-link {
+  font-size: 0.85rem;
+  color: var(--bioluminescent);
+}
+
 /* ---------- Pagination ---------- */
 
 .depth-pagination {

@@ -21,16 +21,32 @@ permalink: /now/
   {% if now.repos | length %}
   <div class="post-list">
     {%- for repo in now.repos -%}
-    <article class="contact-card">
-      <a href="{{ repo.url | escape }}">
+    <details class="contact-card repo-card">
+      <summary>
         <span class="ping" aria-hidden="true"></span>
         <div>
           <h2>{{ repo.name | escape }}</h2>
           <p class="meta">{{ repo.pushedAt | readableDate }}</p>
           {% if repo.description %}<p class="excerpt">{{ repo.description | escape }}</p>{% endif %}
         </div>
-      </a>
-    </article>
+        <span class="chevron" aria-hidden="true">▸</span>
+      </summary>
+      <div class="commit">
+        {% if repo.commit %}
+        <p class="commit-message">{{ repo.commit.message | escape }}</p>
+        <ul class="commit-files">
+          {%- for file in repo.commit.files %}
+          <li><span class="file-name">{{ file.filename | escape }}</span><span class="added">+{{ file.additions }}</span><span class="removed">−{{ file.deletions }}</span></li>
+          {%- endfor %}
+        </ul>
+        {% if repo.commit.moreFiles > 0 %}<p class="more-files">+{{ repo.commit.moreFiles }} more files</p>{% endif %}
+        <a class="commit-link" href="{{ repo.commit.url | escape }}">Open on GitHub ↗</a>
+        {% else %}
+        <p class="more-files">Commit details unavailable</p>
+        <a class="commit-link" href="{{ repo.url | escape }}">Open on GitHub ↗</a>
+        {% endif %}
+      </div>
+    </details>
     {%- endfor -%}
   </div>
   {% else %}

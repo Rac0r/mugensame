@@ -28,6 +28,19 @@ api:
             url: https://api.github.com/users/Rac0r/repos?sort=pushed&per_page=5
         - groovy:
             location: scripts/now-repos.groovy
+        # 1b. Latest commit (message + changed files) for each of those repos
+        - if:
+            test: property.repos != null
+            flow:
+              - for:
+                  in: $
+                  language: jsonpath
+                  flow:
+                    - call:
+                        url: https://api.github.com/repos/${property.it['full_name']}/commits/HEAD
+                        language: spel
+                    - groovy:
+                        location: scripts/now-commit.groovy
         # 2. Latest posts from the published feed (no token sent to github.io)
         - headerFilter:
             - exclude: authorization

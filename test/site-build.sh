@@ -52,7 +52,12 @@ cat > "$NOW_JSON" <<'EOF'
 {
   "generatedAt": "2026-10-13T10:00:00Z",
   "status": { "text": "Learning <b>Membrane</b>", "updatedAt": "2026-10-12T09:00:00Z" },
-  "repos": [ { "name": "dotfiles", "description": "zsh & tmux", "url": "https://github.com/Rac0r/dotfiles", "pushedAt": "2026-10-11T08:00:00Z" } ],
+  "repos": [
+    { "name": "dotfiles", "description": "zsh & tmux", "url": "https://github.com/Rac0r/dotfiles", "pushedAt": "2026-10-11T08:00:00Z",
+      "commit": { "message": "nvim: <script>x</script>\n\nlonger body line", "url": "https://github.com/Rac0r/dotfiles/commit/abc123",
+                  "files": [ { "filename": "nvim/init.lua", "additions": 40, "deletions": 112 } ], "moreFiles": 3 } },
+    { "name": "scratch", "description": null, "url": "https://github.com/Rac0r/scratch", "pushedAt": "2026-10-10T08:00:00Z", "commit": null }
+  ],
   "posts": [ { "title": "Dotfiles", "url": "https://rac0r.github.io/mugensame/posts/dotfiles/", "date": "Fri, 26 Jun 2026 00:00:00 GMT" } ]
 }
 EOF
@@ -61,7 +66,16 @@ PAGE="$OUT/now/index.html"
 check "now page built" "$([ -f "$PAGE" ] && echo yes)" yes
 check "status text escaped" "$(grep -c 'Learning &lt;b&gt;Membrane&lt;/b&gt;' "$PAGE")" 1
 check "no raw HTML from status" "$(grep -c '<b>Membrane</b>' "$PAGE")" 0
-check "repo linked" "$(grep -c 'href="https://github.com/Rac0r/dotfiles"' "$PAGE")" 1
+check "repo card is expandable" "$(grep -c '<details class="contact-card' "$PAGE")" 2
+check "commit linked" "$(grep -c 'href="https://github.com/Rac0r/dotfiles/commit/abc123"' "$PAGE")" 1
+check "commit message escaped" "$(grep -c 'nvim: &lt;script&gt;x&lt;/script&gt;' "$PAGE")" 1
+check "commit body shown" "$(grep -c 'longer body line' "$PAGE")" 1
+check "changed file listed" "$(grep -c 'nvim/init.lua' "$PAGE")" 1
+check "additions shown" "$(grep -c '>+40<' "$PAGE")" 1
+check "deletions shown" "$(grep -c '>−112<' "$PAGE")" 1
+check "more files shown" "$(grep -c '+3 more files' "$PAGE")" 1
+check "missing commit -> unavailable" "$(grep -c 'Commit details unavailable' "$PAGE")" 1
+check "missing commit -> repo linked" "$(grep -c 'href="https://github.com/Rac0r/scratch"' "$PAGE")" 1
 check "post linked" "$(grep -c 'href="https://rac0r.github.io/mugensame/posts/dotfiles/"' "$PAGE")" 1
 check "nav links to now" "$(grep -c 'href="/mugensame/now/"' "$OUT/index.html")" 1
 
