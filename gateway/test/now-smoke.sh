@@ -13,7 +13,13 @@ req GET /now
 check "/now -> 200" "$STATUS" 200
 check "generatedAt is ISO" "$(jq -r '.generatedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T")' <<<"$BODY")" true
 check "repos is a list" "$(jq -r '.repos | type' <<<"$BODY")" array
-check "repo fields" "$(jq -c '.repos[0] | keys' <<<"$BODY")" '["description","name","pushedAt","url"]'
+check "repo fields" "$(jq -c '.repos[0] | keys' <<<"$BODY")" '["commit","description","name","pushedAt","url"]'
+check "commit fields" "$(jq -c '.repos[0].commit | keys' <<<"$BODY")" '["files","message","moreFiles","url"]'
+check "commit url points to the commit" "$(jq -r '.repos[0] | .commit.url | startswith("https://github.com/Rac0r/")' <<<"$BODY")" true
+check "commit message is text" "$(jq -r '.repos[0].commit.message | type' <<<"$BODY")" string
+check "at most 10 files" "$(jq -r '.repos | all(.commit == null or (.commit.files | length <= 10))' <<<"$BODY")" true
+check "file fields" "$(jq -c '.repos[0].commit.files[0] | keys' <<<"$BODY")" '["additions","deletions","filename"]'
+check "moreFiles is a number" "$(jq -r '.repos[0].commit.moreFiles | type' <<<"$BODY")" number
 check "at most 5 repos" "$(jq -r '.repos | length <= 5' <<<"$BODY")" true
 check "posts is a list" "$(jq -r '.posts | type' <<<"$BODY")" array
 check "at most 3 posts" "$(jq -r '.posts | length <= 3' <<<"$BODY")" true
