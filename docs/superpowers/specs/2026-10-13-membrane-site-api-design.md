@@ -1,7 +1,7 @@
 # Membrane Site API — Design
 
 Date: 2026-10-13
-Status: Draft, awaiting review
+Status: Implemented (2026-10-14)
 Live site: https://rac0r.github.io/mugensame/
 
 ## Purpose

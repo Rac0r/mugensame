@@ -49,7 +49,7 @@
   - `admin-smoke.sh` arrays `KEY` (API key header) and `JSON` (content type header) and the marker line `# === end of sections ===` that later tasks insert above.
   - `admin.yaml` `global:` block (API key + GitHub headers) that every later route relies on.
 
-- [ ] **Step 0: Human setup (ask the user to do this; do not create tokens yourself)**
+- [x] **Step 0: Human setup (ask the user to do this; do not create tokens yourself)**
 
 The user creates `gateway/.env` from `gateway/.env.example` (written in Step 3) with:
 - `GITHUB_TOKEN`: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Repository access: *Only select repositories* → `Rac0r/mugensame`. Permissions → Repository permissions → **Contents: Read and write**. Expiration: at most one year.
@@ -57,14 +57,14 @@ The user creates `gateway/.env` from `gateway/.env.example` (written in Step 3) 
 
 Continue with Steps 1–3 while waiting; Step 5 needs the file.
 
-- [ ] **Step 1: Create the branch**
+- [x] **Step 1: Create the branch**
 
 ```bash
 cd ~/Developer/Coding/Projekte/mugensame
 git switch -c feat/membrane-gateway
 ```
 
-- [ ] **Step 2: Write the test harness**
+- [x] **Step 2: Write the test harness**
 
 `gateway/test/lib.sh`:
 
@@ -204,7 +204,7 @@ finish
 chmod +x gateway/test/admin-smoke.sh
 ```
 
-- [ ] **Step 3: Write env handling, launcher, example env, README, ignores**
+- [x] **Step 3: Write env handling, launcher, example env, README, ignores**
 
 `gateway/env.sh`:
 
@@ -343,7 +343,7 @@ gateway/.env
 gateway/test/*.log
 ```
 
-- [ ] **Step 4: Write a minimal `admin.yaml` without routes**
+- [x] **Step 4: Write a minimal `admin.yaml` without routes**
 
 `gateway/admin.yaml`:
 
@@ -377,12 +377,12 @@ global:
           value: mugensame-gateway
 ```
 
-- [ ] **Step 5: Run the tests to verify they fail**
+- [x] **Step 5: Run the tests to verify they fail**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: exits early with `gateway 'admin' did not start` — `admin.yaml` defines no API yet, so nothing listens on port 2000. (The test branch is still cleaned up by the trap.)
 
-- [ ] **Step 6: Add the list route and its script**
+- [x] **Step 6: Add the list route and its script**
 
 Append to `gateway/admin.yaml`:
 
@@ -423,12 +423,12 @@ res.header.setContentType('application/json')
 CONTINUE
 ```
 
-- [ ] **Step 7: Run the tests to verify they pass**
+- [x] **Step 7: Run the tests to verify they pass**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `7 passed, 0 failed`. If `list contains first` fails, read `gateway/test/gateway-admin.log`; a Groovy compile error there means a script typo, a 401 from GitHub means the token lacks access to `Rac0r/mugensame`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add .gitignore gateway/
@@ -450,7 +450,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: Task 1 `global:` block, `lib.sh` helpers, `KEY`.
 - Produces: `github-errors.groovy` runs on every admin response and rewrites only GitHub error bodies (those with `documentation_url` on `docs.github.com`) to `{error, githubStatus, githubMessage}` with status 409 (GitHub 409/422), 404 (404) or 502 (401/403 → error text mentions `GITHUB_TOKEN`; anything else). Membrane's own 400/401 responses pass unchanged. Later tasks rely on 422→409 and 404→404.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Insert above `# === end of sections ===` in `gateway/test/admin-smoke.sh`:
 
@@ -477,12 +477,12 @@ check "bad GitHub token -> 502" "$STATUS" 502
 check "502 names GITHUB_TOKEN" "$(jq -r '.error | contains("GITHUB_TOKEN")' <<<"$BODY")" true
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: the read checks FAIL (`/admin/posts/first` either gets 404 or is answered by the list route as a path prefix), and so do `404 body is mapped`, `404 keeps GitHub status`, `bad GitHub token -> 502` (GitHub's 401 passes through) and `502 names GITHUB_TOKEN`. Task 1 checks still pass.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `gateway/scripts/github-errors.groovy`:
 
@@ -562,12 +562,12 @@ api:
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/src/posts/${pathParam.slug}.md?ref=#{env.GITHUB_BRANCH}"
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `0 failed`. If `read returns front matter` gets JSON, the route's `setHeader` did not override the global `Accept` — check the indentation of the route's `flow:`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add gateway/
@@ -593,7 +593,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
   4. `target:` PUT or DELETE `contents/${property.path}`.
   5. `commit-response.groovy` in `response:` → status `successStatus`, body `result` (empty for 204).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Insert above `# === end of sections ===`:
 
@@ -613,12 +613,12 @@ req PUT /admin/status "${KEY[@]}" "${JSON[@]}" -d '{"text":"x","extra":1}'
 check "unknown field -> 400" "$STATUS" 400
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: the status checks FAIL (404, no route); earlier checks pass.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `gateway/schemas/status.json`:
 
@@ -754,12 +754,12 @@ api:
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `0 failed`. A 409 on the second write means `read-sha.groovy` did not find the sha — check that the `call:` URL contains `?ref=` with the test branch.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add gateway/
@@ -780,7 +780,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: commit pipeline from Task 3 (`commit-body.groovy`, `commit-response.groovy`), 422→409 mapping from Task 2.
 - Produces: `post-file.groovy`, which serves POST, PUT and DELETE: slug from `title` for POST, from `property.slug` for PUT/DELETE; answers 400 itself for an invalid slug or impossible date; otherwise sets `slug`, `path`, `message`, `successStatus`, `result` and (not for DELETE) `content`. Shell variable `SLUG=gateway-test-hello-1` in `admin-smoke.sh`, used by Task 5.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Insert above `# === end of sections ===`:
 
@@ -826,12 +826,12 @@ check "bad-date post not committed" "$(gh_status src/posts/bad-date.md)" 404
 
 (`ruby` ships with macOS; it is used only to prove the front matter parses as YAML.)
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: create checks FAIL — `POST /admin/posts` has no route (404); the `400` checks fail with 404 too.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `gateway/schemas/post.json`:
 
@@ -956,12 +956,12 @@ api:
 
 No sha lookup here: creating without `sha` makes GitHub answer 422 for an existing file, which Task 2 maps to 409.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `0 failed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add gateway/
@@ -981,7 +981,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `post-file.groovy` (reads `property.slug`), `read-sha.groovy`, `commit-body.groovy`, `commit-response.groovy`, `SLUG` and `POST_BODY` from Task 4's test section.
 - Produces: nothing new for later tasks.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Insert above `# === end of sections ===`:
 
@@ -1011,12 +1011,12 @@ req DELETE /admin/posts/Bad_Slug "${KEY[@]}"
 check "delete invalid slug -> 400" "$STATUS" 400
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `update -> 200`, `delete -> 204` and the other status checks FAIL — there is no PUT/DELETE route for `/admin/posts/{slug}` yet. `update did not create file` and `file is gone` may already pass; that is fine.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Append to `gateway/admin.yaml`:
 
@@ -1097,12 +1097,12 @@ api:
 
 The validator runs before `post-file.groovy` reads the body, and `post-file.groovy` runs before the `call:` that overwrites it — keep this order.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `0 failed`. If `delete -> 204` gets 409 or 422 from GitHub, the DELETE body lacks `sha` — confirm `read-sha.groovy` runs after the `call:`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add gateway/
@@ -1123,7 +1123,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `commit-body.groovy` (accepts `byte[]` content), `commit-response.groovy`, 422→409 mapping.
 - Produces: images committed to `src/images/<filename>`; result `{url: "/mugensame/images/<filename>"}`. Task 7 makes Eleventy copy that folder.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Insert above `# === end of sections ===`:
 
@@ -1150,12 +1150,12 @@ check "big image not committed" "$(gh_status src/images/big.png)" 404
 rm -f "$IMG" "$BIG"
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: image checks FAIL with 404 (no route).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `gateway/scripts/image-file.groovy`:
 
@@ -1217,12 +1217,12 @@ api:
     url: "https://api.github.com/repos/Rac0r/mugensame/contents/${property.path}"
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `gateway/test/admin-smoke.sh`
 Expected: `0 failed`. If the oversized upload gets a different status from Membrane itself (a body-size limit firing before the script), stop and report the status and log lines instead of loosening the test — the spec requires 413.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add gateway/
@@ -1243,7 +1243,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `check`/`finish` from `gateway/test/lib.sh`.
 - Produces: `test/site-build.sh` with a `build` function (builds into `$OUT`) and the marker `# === end of sections ===` that Task 9 inserts above.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `test/site-build.sh`:
 
@@ -1301,12 +1301,12 @@ chmod +x test/site-build.sh
 mkdir -p src/images && touch src/images/.gitkeep
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `test/site-build.sh`
 Expected: `draft post is not built` FAILS (`built`), `draft not in feed` FAILS (1), `image copied` FAILS.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `eleventy.config.js`, below `eleventyConfig.addPassthroughCopy("src/js");` add:
 
@@ -1322,12 +1322,12 @@ In `eleventy.config.js`, below `eleventyConfig.addPassthroughCopy("src/js");` ad
   });
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `test/site-build.sh`
 Expected: `4 passed, 0 failed`; `git status --short` shows no leftover fixture files.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add eleventy.config.js src/images/.gitkeep test/site-build.sh
@@ -1347,7 +1347,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `lib.sh` (`load_env`, `req`, `check`, `start_gateway now`, `stop_gateway`).
 - Produces: `GET /now` → 200 `{generatedAt, status: {text, updatedAt} | null, repos: [{name, description, url, pushedAt}] | null, posts: [{title, url, date}] | null}`. Task 9 renders it, Task 10 saves it in CI.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `gateway/test/now-smoke.sh`:
 
@@ -1407,12 +1407,12 @@ finish
 chmod +x gateway/test/now-smoke.sh
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `gateway/test/now-smoke.sh`
 Expected: exits with "gateway 'now' did not start" (no `now.yaml`).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `gateway/now.yaml`:
 
@@ -1544,12 +1544,12 @@ Response.ok()
         .build()
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `gateway/test/now-smoke.sh`
 Expected: `15 passed, 0 failed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add gateway/now.yaml gateway/scripts/now-*.groovy gateway/test/now-smoke.sh
@@ -1570,7 +1570,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `/now` JSON shape from Task 8 as Eleventy global data `now` (file `src/_data/now.json`); `build`, `OUT`, `check` from `test/site-build.sh`.
 - Produces: page at `/mugensame/now/`; Task 10 writes `src/_data/now.json` before the build.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `test/site-build.sh`, replace the `cleanup()` line (and keep the `trap cleanup EXIT` line after it) with the following, so a real generated `now.json` is backed up and restored:
 
@@ -1619,12 +1619,12 @@ build
 check "missing now.json -> page still built" "$(grep -c 'Posts unavailable' "$OUT/now/index.html")" 1
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `test/site-build.sh`
 Expected: Task 7 checks pass; `now page built` and the other Now checks FAIL.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `src/now.njk`:
 
@@ -1705,12 +1705,12 @@ Append to `.gitignore`:
 src/_data/now.json
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `test/site-build.sh`
 Expected: `0 failed`. Then preview: `npm run serve`, open `http://localhost:8080/mugensame/now/` and check the page looks like the home page's "Latest contacts" cards. Stop the server.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/now.njk src/_includes/base.njk .gitignore test/site-build.sh
@@ -1731,7 +1731,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `now.yaml` (Task 8), Now page (Task 9), `lib.sh`.
 - Produces: `gateway/ci-fetch-now.sh` — runs `now.yaml` in `predic8/membrane:7.7.0` (override with `MEMBRANE_IMAGE`), writes `src/_data/now.json`, always exits 0 and writes `{}` on any failure.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `gateway/test/ci-fetch-now-test.sh`:
 
@@ -1765,12 +1765,12 @@ finish
 chmod +x gateway/test/ci-fetch-now-test.sh
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `gateway/test/ci-fetch-now-test.sh`
 Expected: FAIL — `gateway/ci-fetch-now.sh: No such file or directory`; exit-code checks report 127.
 
-- [ ] **Step 3: Implement the script**
+- [x] **Step 3: Implement the script**
 
 `gateway/ci-fetch-now.sh`:
 
@@ -1816,12 +1816,12 @@ fi
 chmod +x gateway/ci-fetch-now.sh
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `gateway/test/ci-fetch-now-test.sh`
 Expected: `6 passed, 0 failed` (the first run pulls the Docker image, allow a minute).
 
-- [ ] **Step 5: Update the workflow**
+- [x] **Step 5: Update the workflow**
 
 In `.github/workflows/deploy.yml`:
 
@@ -1854,7 +1854,7 @@ Validate the workflow:
 Run: `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color`
 Expected: no output, exit 0.
 
-- [ ] **Step 6: Document CI in the README**
+- [x] **Step 6: Document CI in the README**
 
 Append to `gateway/README.md`:
 
@@ -1868,7 +1868,7 @@ schedule (05:17 UTC) keeps the page fresh. Test it locally with
 `gateway/test/ci-fetch-now-test.sh`.
 ````
 
-- [ ] **Step 7: Run every test once more**
+- [x] **Step 7: Run every test once more**
 
 ```bash
 gateway/test/admin-smoke.sh
@@ -1879,7 +1879,7 @@ gateway/test/ci-fetch-now-test.sh
 
 Expected: each ends with `0 failed`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add gateway/ci-fetch-now.sh gateway/test/ci-fetch-now-test.sh gateway/README.md .github/workflows/deploy.yml
@@ -1888,7 +1888,7 @@ git commit -m "ci: fill the Now page with Membrane during deploy
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
-- [ ] **Step 9: Hand over (ask the user; do not push yourself)**
+- [x] **Step 9: Hand over (ask the user; do not push yourself)**
 
 Tell the user the branch is ready and what remains, all of which publish or touch the live site:
 1. Push `feat/membrane-gateway` and open a PR (or merge locally) into `main` — merging deploys.
